@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PowerOfTwoMaxHeap Demo</title>
+  <style>body{font-family:Segoe UI,Arial;margin:16px} pre{background:#f5f5f5;padding:12px;border-radius:6px}</style>
+</head>
+<body>
+  <h2>PowerOfTwoMaxHeap Demo (runs in browser)</h2>
+  <p>Open the console (DevTools) or view the output box below.</p>
+  <pre id="out"></pre>
+
+  <script>
+// PowerOfTwoMaxHeap (same logic as your file)
+class PowerOfTwoMaxHeap {
+    constructor(degreeExponent) {
+        if (degreeExponent < 0) throw new Error("Exponent must be non-negative");
+        this.heap = [];
+        this.degreeExponent = degreeExponent;
+        this.numChildren = 1 << degreeExponent;
+    }
+
+    insert(value) {
+        this.heap.push(value);
+        this._bubbleUp(this.heap.length - 1);
+    }
+
+    popMax() {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop();
+        const max = this.heap[0];
+        this.heap[0] = this.heap.pop();
+        this._sinkDown(0);
+        return max;
+    }
+
+    _bubbleUp(index) {
+        const element = this.heap[index];
+        while (index > 0) {
+            let parentIndex = (index - 1) >> this.degreeExponent;
+            let parent = this.heap[parentIndex];
+            if (element <= parent) break;
+            this.heap[index] = parent;
+            index = parentIndex;
+        }
+        this.heap[index] = element;
+    }
+
+    _sinkDown(index) {
+        const length = this.heap.length;
+        const element = this.heap[index];
+        while (true) {
+            let largestChildIndex = -1;
+            let maxValue = -Infinity;
+            let firstChild = (index << this.degreeExponent) + 1;
+            let lastChild = Math.min(firstChild + this.numChildren, length);
+            for (let i = firstChild; i < lastChild; i++) {
+                if (this.heap[i] > maxValue) {
+                    maxValue = this.heap[i];
+                    largestChildIndex = i;
+                }
+            }
+            if (largestChildIndex === -1 || maxValue <= element) break;
+            this.heap[index] = this.heap[largestChildIndex];
+            index = largestChildIndex;
+        }
+        this.heap[index] = element;
+    }
+}
+
+// small helper to write to page
+function write(...args){
+    const el = document.getElementById('out');
+    el.textContent += args.join(' ') + '\n';
+    console.log(...args);
+}
+
+// Demo harness
+(function demo(){
+    const heap = new PowerOfTwoMaxHeap(1); // binary heap
+    [3,1,6,5,2,4].forEach(n => heap.insert(n));
+    write('Heap internal array:', JSON.stringify(heap.heap));
+    write('popMax() ->', heap.popMax());
+    write('Array after pop:', JSON.stringify(heap.heap));
+})();
+  </script>
+</body>
+</html>
